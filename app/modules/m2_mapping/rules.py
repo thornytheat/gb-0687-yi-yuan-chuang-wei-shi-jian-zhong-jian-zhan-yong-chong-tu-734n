@@ -9,5 +9,5 @@ def normalize(row):
     version=number(row['version'])
     if version<1 or version!=version.to_integral(): raise DomainError('RANGE','版本无效')
     out['version']=int(version)
-    if out['type'] not in ('admit','transfer','discharge'): raise DomainError('STATE','未知事件类型')
+    if out['type'] not in ('admit','transfer','discharge','clean'): raise DomainError('STATE','未知事件类型')
     return out

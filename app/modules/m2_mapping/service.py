@@ -3,8 +3,8 @@ from app.errors import DomainError
 from app.reasons import rejected
 from app.normalize import instant,number
 def execute(ctx):
-    end=instant(ctx['params']['observation_end']);offset=number(ctx['params']['day_offset']);late=number(ctx['params']['late_minutes'])
-    if offset!=8 or late<0: raise DomainError('RANGE','日期偏移须为8，迟到阈值非负')
+    end=instant(ctx['params']['observation_end']);offset=number(ctx['params']['day_offset']);late=number(ctx['params']['late_minutes']);clean_minutes=number(ctx['params']['clean_minutes'])
+    if offset!=8 or late<0 or clean_minutes<0: raise DomainError('RANGE','日期偏移须为8，迟到阈值与清洁时长非负')
     good=[]
     for row in ctx['records']:
         try:

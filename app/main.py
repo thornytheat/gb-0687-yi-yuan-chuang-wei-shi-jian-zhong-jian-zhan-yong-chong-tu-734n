@@ -53,7 +53,18 @@ def create_app():
             writer.writerow([result["manifest"]["run_id"],row.get("_line",""),row.get("id",row.get("event_id","")),"PASS",json.dumps(serial(row),ensure_ascii=False)])
         for row in result["quarantine"]:
             writer.writerow([result["manifest"]["run_id"],row["line"],row["key"],row["code"],json.dumps(row,ensure_ascii=False)])
+        for row in result.get("early_admissions",[]):
+            writer.writerow([result["manifest"]["run_id"],"",row["release_id"],"EARLY",json.dumps(serial(row),ensure_ascii=False)])
         return Response("\ufeff"+stream.getvalue(),content_type="text/csv; charset=utf-8",headers={"Content-Disposition":"attachment; filename=evidence.csv"})
+    @app.get("/api/beds.csv")
+    def beds():
+        result=store.fetch(request.args["run"]) if request.args.get("run") else run()
+        stream=io.StringIO(newline="");writer=csv.writer(stream)
+        writer.writerow(["\u6279\u6b21","\u5e8a\u53f7","\u75c5\u533a","\u5f53\u524d\u72b6\u6001","\u91ca\u653e\u65f6\u523b UTC","\u6e05\u6d01\u5b8c\u6210 UTC","\u91ca\u653e\u4f9d\u636e","\u590d\u6838"])
+        for row in result.get("bed_board",[]):
+            writer.writerow([result["manifest"]["run_id"],row["bed"],row["ward"],row["state"],
+                             row["released_at"],row["cleaned_at"],row["basis"],"\u5f85\u590d\u6838" if row["review"] else ""])
+        return Response("\ufeff"+stream.getvalue(),content_type="text/csv; charset=utf-8",headers={"Content-Disposition":"attachment; filename=beds.csv"})
     for n,name in enumerate(STAGES,1): app.register_blueprint(import_module(f"app.modules.m{n}_{name}.handler").bp)
     return app
 app=create_app()
